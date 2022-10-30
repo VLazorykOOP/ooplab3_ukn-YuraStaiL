@@ -2,11 +2,148 @@
 #define CODING_VS_CODE
 #endif
 #include <iostream>
+#include<cassert>
+#include <array>
 #include <math.h>
 #if !defined(CODING_VS_CODE)
 	#include <clocale>
 #endif
+
+
 using namespace std;
+
+class Triangle {
+private:
+	double side_a;
+	double side_b;
+	double side_c;
+	unsigned int color;
+
+public:
+	void setColor(unsigned int color) {
+		assert(color >= 0 && "Color must be greater or equal than 0");
+		this->color = color;
+	}
+
+	void set3Sides(double side_a, double side_b, double side_c)
+	{
+		if (side_a > 0 && side_b > 0 && side_c > 0)
+		{
+			if ((side_a == side_b) && (side_a == side_c))
+			{
+				this->side_a = side_a;
+				this->side_b = side_b;
+				this->side_c = side_c;
+			}
+			else
+			{
+				double fewerNumber1(side_b);
+				double fewerNumber2(side_c);
+				double max = side_a;
+				
+				
+
+				if (max > side_b)
+				{
+					if (max < side_c)
+					{
+						max = side_c;
+						fewerNumber1 = side_a;
+						fewerNumber2 = side_b;
+					}
+					else
+					{
+						fewerNumber1 = side_b;
+						fewerNumber2 = side_c;
+					}
+				}
+				else
+				{
+					if (side_b > side_c)
+					{
+						max = side_b;
+						fewerNumber1 = side_a;
+						fewerNumber2 = side_c;
+					}
+					else
+					{
+						max = side_c;
+						fewerNumber1 = side_a;
+						fewerNumber2 = side_b;
+					}
+				}
+
+				cout << "max = " << max << "\n";
+
+				assert(fewerNumber1 + fewerNumber2 > max && "triangle with this sides cannot exist");
+				
+				if ((fewerNumber1 + fewerNumber2) > max)
+				{
+					this->side_a = side_a;
+					this->side_b = side_b;
+					this->side_c = side_c;
+				}
+				
+			}
+		}
+		else
+		{
+			assert("sides triangle must be a positive numbers");
+		}
+	}
+
+	unsigned int getColor() {
+		return this->color;
+	}
+
+	double get3Sides(array<double, 3>& myArray)
+	{
+		myArray[0] = side_a;
+		myArray[1] = side_b;
+		myArray[2] = side_c;
+	}
+
+
+
+	void Init(double side_a, double side_b, double side_c, unsigned int color) {
+		setColor(color);
+		set3Sides(side_a, side_b, side_c);
+	}
+
+	Triangle() : side_a(1.0), side_b(1.0), side_c(1.0), color(0) {};
+
+	Triangle(double side_a, double side_b, double side_c, unsigned int color) {
+		Init(side_a, side_b, side_c, color);
+	}
+
+	Triangle(double side_a) : Triangle(side_a, 1.0, 1.0, 0) {};
+	Triangle(double side_a, double side_b) : Triangle(side_a, side_b, 1.0, 0) {};
+	Triangle(double side_a, double side_b, double side_c) : Triangle(side_a, side_b, side_c, 0) {};
+
+	
+
+
+
+	void showInfoAboutTriangle() {
+		cout << "-----------------\n\tColor = " << this->color << "\n";
+		cout << "Sides:\n\tside 1 = " << this->side_a <<
+			"\n\tside 2 = " << this->side_b <<
+			"\n\tside 3 = " << this->side_c <<
+			"\n-----------------\n";
+	}
+
+
+};
+
+
+int mainExample11(){
+	Triangle triangle1(2.0, 5.0, 6.0);
+	triangle1.showInfoAboutTriangle();
+	return 1;
+}
+
+
+////////////////////////////////////////////////
 
 class Icosahedron {
 	double a; // side of the icosahedron
@@ -64,6 +201,8 @@ public:
 	}
 
 };
+
+
 int mainExample1()
 {
 	Icosahedron obj;
