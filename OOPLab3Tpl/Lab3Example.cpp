@@ -27,7 +27,16 @@ public:
 
 	void set3Sides(double side_a, double side_b, double side_c)
 	{
-		if (side_a > 0 && side_b > 0 && side_c > 0)
+		assert((side_a > 0 && side_b > 0 && side_c > 0) && "sides triangle must be a positive numbers");
+		
+		assert(((side_a + side_b) > side_c) && ((side_a + side_c) > side_b) && ((side_c + side_b) > side_a) && "The sum of the lengths of any two sides of a triangle is greater than the length of the remaining side");
+		this->side_a = side_a;
+		this->side_b = side_b;
+		this->side_c = side_c;
+
+
+
+		/*if (side_a > 0 && side_b > 0 && side_c > 0)
 		{
 			if ((side_a == side_b) && (side_a == side_c))
 			{
@@ -89,14 +98,14 @@ public:
 		else
 		{
 			assert("sides triangle must be a positive numbers");
-		}
+		}*/
 	}
 
 	unsigned int getColor() {
 		return this->color;
 	}
 
-	double get3Sides(array<double, 3>& myArray)
+	void get3Sides(array<double, 3> &myArray)
 	{
 		myArray[0] = side_a;
 		myArray[1] = side_b;
@@ -120,16 +129,26 @@ public:
 	Triangle(double side_a, double side_b) : Triangle(side_a, side_b, 1.0, 0) {};
 	Triangle(double side_a, double side_b, double side_c) : Triangle(side_a, side_b, side_c, 0) {};
 
-	
+	double halfPerimeter() {
+		return (this->side_a + this->side_b + this->side_c) / 2;
+	}
 
+	double area() {
+		double p = halfPerimeter();
+		return sqrt(p * ((p - side_a) * (p - side_b) * (p - side_c)));
+	}
+
+	double perimeter() {
+		return side_a + side_b + side_c;
+	}
 
 
 	void showInfoAboutTriangle() {
-		cout << "-----------------\n\tColor = " << this->color << "\n";
+		cout << "--------------------\n\tColor = " << this->color << "\n";
 		cout << "Sides:\n\tside 1 = " << this->side_a <<
 			"\n\tside 2 = " << this->side_b <<
 			"\n\tside 3 = " << this->side_c <<
-			"\n-----------------\n";
+			"\n--------------------\n";
 	}
 
 
@@ -137,7 +156,26 @@ public:
 
 
 int mainExample11(){
-	Triangle triangle1(2.0, 5.0, 6.0);
+	Triangle triangle1(2.0, 5.0, 6.0, 7);
+
+	cout << "TASK 1.5 class Rectangle\n";
+
+	cout << "triangle.area()       = " << triangle1.area() << "\n";
+
+	cout << "triangle1.perimeter() = " << triangle1.perimeter() << "\n";
+
+	array<double, 3> myArray;
+	triangle1.get3Sides(myArray);
+	cout << "Used method : get3Sides(): \n";
+	cout << "Sides:\n";
+	for (const auto &element : myArray)
+	{
+		cout << element << " ";
+	}
+
+	cout << "\n";
+
+	cout << "Used method : showInfoAboutTriangle()\n";
 	triangle1.showInfoAboutTriangle();
 	return 1;
 }
