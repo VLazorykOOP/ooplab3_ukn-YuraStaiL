@@ -181,7 +181,7 @@ int mainExample11(){
 }
 
 enum STATE {
-	OK, ZERO_VECTOR, BAD_VALUE, BAD_DIV, NEGATIVE_SIZE
+	OK, ZERO_VECTOR, NEGATIVE_SIZE, BAD_INIT, BAD_DIV
 };
 
 
@@ -191,67 +191,53 @@ class longVector {
 	int state;
 
 public:
-	longVector() : vector(nullptr), quantityElements(0), (state = ZERO_VECTOR) {};
+	longVector() : vector(nullptr), quantityElements(0), state (ZERO_VECTOR) {};
 	longVector(int quantityElements);
-	longVector(int quantityElements, long value&);
-	longVector(int quantityElements, long InputVector*);
+	longVector(int quantityElements, long&);
+	longVector(int quantityElements, long* InputVector);
 	longVector(const longVector& copy);
 	longVector& operator=(const longVector& assign);
 	~longVector() {
 		cout << "delete vector";
 		if (vector) {
-			delete[] v;
+			delete[] vector;
 		}
 
 	}
+
+	void checkQuantityElements(int quantityElements);
+	void setValueVectorByIndex(int indexVector,const long &element);
 	void output();
 	void input();
-	longVector add(longVector& b);
 
+	long getValueVectorByIndex(int indexVector);
+
+	bool isIndexIncludedVector(int indexVector);
+	bool isEmptyVector();
+
+	longVector add(longVector& inputVector);
+	longVector subtract(longVector& inputVector);
+	longVector multiplyVectorOnUnsignedInt(unsigned int number);
 };
 
-longVector::longVector(int quantityElements) {
-	if (quantityElements <= 0)
-	{
-		vector = nullptr;
-		quantityElements = 0;
-		state = ZERO_VECTOR;
-		cout << "Vector was not created: quantity <= 0";
-	}
-	else
-	{
-		this->quantityElements = quantityElements;
-		state = OK;
-	}
 
-	
+longVector::longVector(int quantityElements) {
+	checkQuantityElements(quantityElements);
+
 	vector = new long[quantityElements];
 	fill_n(0, quantityElements, 0);
 }
 
-longVector::longVector(int quantityElements, long value&) {
-	if (quantityElements <= 0)
-	{
-		vector = nullptr;
-		quantityElements = 0;
-		state = ZERO_VECTOR;
-		cout << "Vector was not created: quantity <= 0";
-	}
-	else
-	{
-		this->quantityElements = quantityElements;
-		state = OK;
-	}
-	
-
+longVector::longVector(int quantityElements, long& value) {
+	checkQuantityElements(quantityElements);
 	
 	vector = new long[quantityElements];
 	fill_n(0, quantityElements, value);
 
 }
 
-longVector::longVector(int quantityElements, long InputVector*) {
-	if (quantityElements <= 0 || p == nullptr)
+longVector::longVector(int quantityElements, long* inputVector) {
+	if (quantityElements <= 0 || (inputVector == nullptr))
 	{
 		vector = nullptr;
 		quantityElements = 0;
@@ -268,7 +254,7 @@ longVector::longVector(int quantityElements, long InputVector*) {
 	vector = new long[quantityElements];
 	for (int i = 0; i < quantityElements; i++)
 	{
-		vector[i] = InputVector[i];
+		vector[i] = inputVector[i];
 	}
 }
 
@@ -278,7 +264,7 @@ longVector::longVector(const longVector& inputCopy) {
 
 	for (int i = 0; i < quantityElements; i++)
 	{
-		vector[i] = inputCopy[i];
+		vector[i] = inputCopy.vector[i];
 	}
 
 	state = OK;
@@ -293,6 +279,7 @@ longVector& longVector::operator=(const longVector& assign) {
 		}
 		quantityElements = assign.quantityElements;
 		vector = new long[quantityElements];
+		state = OK;
 	}
 
 	for (int i = 0; i < quantityElements; i++)
@@ -302,6 +289,60 @@ longVector& longVector::operator=(const longVector& assign) {
 	
 	return *this;
 }
+
+void longVector::checkQuantityElements(int quantityElements)
+{
+	if (quantityElements <= 0)
+	{
+		vector = nullptr;
+		this->quantityElements = 0;
+		state = ZERO_VECTOR;
+		cout << "Vector was not created: quantity <= 0";
+	}
+	else
+	{
+		this->quantityElements = quantityElements;
+		state = OK;
+	}
+}
+
+bool longVector::isEmptyVector() {
+	if (this->quantityElements <= 0)
+	{
+		return true;
+		cout << "!ERROR: Array is empty\n";
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool longVector::isIndexIncludedVector(int indexVector) {
+	if ((indexVector >= 0) && (indexVector <= this->quantityElements - 1))
+	{
+		return true;
+	}
+	else
+	{
+		cout << "!ERROR: Array index is out of range\n";
+		return false;
+	}
+}
+
+void longVector::setValueVectorByIndex(int indexVector, const long& element)
+{
+	if (isIndexIncludedVector(indexVector) && !isEmptyVector())
+	{
+		vector[indexVector] = element;
+	}
+	else
+	{
+		cout << "Incorrect index\n";
+	}
+
+}
+
 
 void longVector::input() {
 	if (vector)
@@ -324,8 +365,21 @@ void longVector::input() {
 	}
 }
 
+long longVector::getValueVectorByIndex(int indexVector)
+{
+	if (isIndexIncludedVector(indexVector) && !isEmptyVector())
+	{
+		return vector[indexVector];
+	}
+	else
+	{
+		cout << "Returned 0\n";
+		return 0;
+	}
+}
+
 void longVector::output() {
-	cout << "Information about vector:"
+	cout << "Information about vector:";
 	if (quantityElements != 0)
 	{
 		for (int i = 0; i < quantityElements; i++)
@@ -339,23 +393,6 @@ void longVector::output() {
 	}
 }
 
-longVector longVector::add(longVector &inputVector) {
-	int leastQuantityOfVectors = quantityElements < inputVector.quantityElements ? quantityElements : inputVector.quantityElements;
-	if (leastQuantityOfVectors >= 0)
-	{
-		longVector total(leastQuantityOfVectors);
-		for (int i = 0; i < leastQuantityOfVectors; i++)
-		{
-			total.vector[i] = vector[i] + inputVector.vector[i];
-		}
-		return total;
-	}
-	else
-	{
-		cout >> "Returned zero vector\n";
-		return longVector(0);
-	}
-}
 
 longVector longVector::add(longVector& inputVector) {
 	int leastQuantityOfVectors = quantityElements < inputVector.quantityElements ? quantityElements : inputVector.quantityElements;
@@ -370,9 +407,46 @@ longVector longVector::add(longVector& inputVector) {
 	}
 	else
 	{
-		cout >> "Returned empty vector\n";
+		cout << "Returned empty vector\n";
 		return longVector(0);
 	}
+}
+
+longVector longVector::subtract(longVector& inputVector) {
+	int leastQuantityOfVectors = quantityElements < inputVector.quantityElements ? quantityElements : inputVector.quantityElements;
+	if (leastQuantityOfVectors >= 0)
+	{
+		longVector total(leastQuantityOfVectors);
+		for (int i = 0; i < leastQuantityOfVectors; i++)
+		{
+			total.vector[i] = vector[i] - inputVector.vector[i];
+		}
+		return total;
+	}
+	else
+	{
+		cout << "Returned empty vector\n";
+		return longVector(0);
+	}
+}
+
+longVector longVector::multiplyVectorOnUnsignedInt(unsigned int number)
+{
+	if (!isEmptyVector())
+	{
+		longVector temp(quantityElements);
+		for (int i = 0; i < quantityElements; i++)
+		{
+			temp.vector[i] = vector[i] * number;
+		}
+		return temp;
+	}
+	else
+	{
+		cout << "Returned empty vector\n";
+		return longVector(0);
+	}
+	
 }
 
 ////////////////////////////////////////////////
@@ -489,9 +563,7 @@ o	функцію ділення на ціле типу double(при ділен�
 o	визначити функцію порівняння менше які повертають true або false.
 У змінну стани встановлювати код помилки, діленні на 0, при передачі NULL (nulptr) в конструкторі із вказівником. Передбачити можливість підрахунку числа об'єктів даного типу. Написати програму тестування всіх можливостей цього класу.
 */
-enum STATE {
-	OK, BAD_INIT, BAD_DIV
-};
+
 
 class Vec2
 {
