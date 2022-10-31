@@ -180,6 +180,200 @@ int mainExample11(){
 	return 1;
 }
 
+enum STATE {
+	OK, ZERO_VECTOR, BAD_VALUE, BAD_DIV, NEGATIVE_SIZE
+};
+
+
+class longVector {
+	long quantityElements;
+	long *vector;
+	int state;
+
+public:
+	longVector() : vector(nullptr), quantityElements(0), (state = ZERO_VECTOR) {};
+	longVector(int quantityElements);
+	longVector(int quantityElements, long value&);
+	longVector(int quantityElements, long InputVector*);
+	longVector(const longVector& copy);
+	longVector& operator=(const longVector& assign);
+	~longVector() {
+		cout << "delete vector";
+		if (vector) {
+			delete[] v;
+		}
+
+	}
+	void output();
+	void input();
+	longVector add(longVector& b);
+
+};
+
+longVector::longVector(int quantityElements) {
+	if (quantityElements <= 0)
+	{
+		vector = nullptr;
+		quantityElements = 0;
+		state = ZERO_VECTOR;
+		cout << "Vector was not created: quantity <= 0";
+	}
+	else
+	{
+		this->quantityElements = quantityElements;
+		state = OK;
+	}
+
+	
+	vector = new long[quantityElements];
+	fill_n(0, quantityElements, 0);
+}
+
+longVector::longVector(int quantityElements, long value&) {
+	if (quantityElements <= 0)
+	{
+		vector = nullptr;
+		quantityElements = 0;
+		state = ZERO_VECTOR;
+		cout << "Vector was not created: quantity <= 0";
+	}
+	else
+	{
+		this->quantityElements = quantityElements;
+		state = OK;
+	}
+	
+
+	
+	vector = new long[quantityElements];
+	fill_n(0, quantityElements, value);
+
+}
+
+longVector::longVector(int quantityElements, long InputVector*) {
+	if (quantityElements <= 0 || p == nullptr)
+	{
+		vector = nullptr;
+		quantityElements = 0;
+		state = ZERO_VECTOR;
+		cout << "Vector was not created: quantity <= 0";
+	}
+	else
+	{
+		this->quantityElements = quantityElements;
+		state = OK;
+	}
+
+	
+	vector = new long[quantityElements];
+	for (int i = 0; i < quantityElements; i++)
+	{
+		vector[i] = InputVector[i];
+	}
+}
+
+longVector::longVector(const longVector& inputCopy) {
+	this->quantityElements = quantityElements;
+	vector = new long[quantityElements];
+
+	for (int i = 0; i < quantityElements; i++)
+	{
+		vector[i] = inputCopy[i];
+	}
+
+	state = OK;
+}
+
+longVector& longVector::operator=(const longVector& assign) {
+	if (quantityElements != assign.quantityElements)
+	{
+		if (vector)
+		{
+			delete[] vector;
+		}
+		quantityElements = assign.quantityElements;
+		vector = new long[quantityElements];
+	}
+
+	for (int i = 0; i < quantityElements; i++)
+	{
+		vector[i] = assign.vector[i];
+	}
+	
+	return *this;
+}
+
+void longVector::input() {
+	if (vector)
+	{
+		delete[] vector;
+	}
+	do
+	{
+		cout << "Input non-zero size the VECTOR:\n";
+		cin >> quantityElements;
+	} while (quantityElements <= 0);
+
+	vector = new long[quantityElements];
+
+	for (int i = 0; i < quantityElements; i++)
+	{
+		cout << "Input a long element the vector[" << i << "]: ";
+		cin >> vector[i];
+		cout << "\n";
+	}
+}
+
+void longVector::output() {
+	cout << "Information about vector:"
+	if (quantityElements != 0)
+	{
+		for (int i = 0; i < quantityElements; i++)
+		{
+			cout << "\tElement vector[" << i << "] = " << vector[i] << "\n";
+		}
+	}
+	else
+	{
+		cout << "\tEmpty vector";
+	}
+}
+
+longVector longVector::add(longVector &inputVector) {
+	int leastQuantityOfVectors = quantityElements < inputVector.quantityElements ? quantityElements : inputVector.quantityElements;
+	if (leastQuantityOfVectors >= 0)
+	{
+		longVector total(leastQuantityOfVectors);
+		for (int i = 0; i < leastQuantityOfVectors; i++)
+		{
+			total.vector[i] = vector[i] + inputVector.vector[i];
+		}
+		return total;
+	}
+	else
+	{
+		cout >> "Returned zero vector\n";
+		return longVector(0);
+	}
+}
+
+longVector longVector::add(longVector& inputVector) {
+	int leastQuantityOfVectors = quantityElements < inputVector.quantityElements ? quantityElements : inputVector.quantityElements;
+	if (leastQuantityOfVectors >= 0)
+	{
+		longVector total(leastQuantityOfVectors);
+		for (int i = 0; i < leastQuantityOfVectors; i++)
+		{
+			total.vector[i] = vector[i] + inputVector.vector[i];
+		}
+		return total;
+	}
+	else
+	{
+		cout >> "Returned empty vector\n";
+		return longVector(0);
+	}
+}
 
 ////////////////////////////////////////////////
 
