@@ -193,27 +193,32 @@ class longVector {
 public:
 	longVector() : vector(nullptr), quantityElements(0), state (ZERO_VECTOR) {};
 	longVector(int quantityElements);
-	longVector(int quantityElements, long&);
+	longVector(int quantityElements, long& value);
 	longVector(int quantityElements, long* InputVector);
 	longVector(const longVector& copy);
 	longVector& operator=(const longVector& assign);
 	~longVector() {
-		cout << "delete vector";
+		cout << "\n(DESTRUCTOR)delete vector\n";
 		if (vector) {
 			delete[] vector;
 		}
 
 	}
 
-	void checkQuantityElements(int quantityElements);
+	
 	void setValueVectorByIndex(int indexVector,const long &element);
 	void output();
 	void input();
 
 	long getValueVectorByIndex(int indexVector);
 
+	bool checkQuantityElements(int quantityElements);
 	bool isIndexIncludedVector(int indexVector);
 	bool isEmptyVector();
+
+	bool isEqual(longVector, longVector);
+	bool isSmaller(longVector, longVector);
+	bool isGreater(longVector, longVector);
 
 	longVector add(longVector& inputVector);
 	longVector subtract(longVector& inputVector);
@@ -222,18 +227,31 @@ public:
 
 
 longVector::longVector(int quantityElements) {
-	checkQuantityElements(quantityElements);
-
-	vector = new long[quantityElements];
-	fill_n(0, quantityElements, 0);
+	if(checkQuantityElements(quantityElements));
+	{
+		vector = new long[quantityElements];
+		for (int i = 0; i < quantityElements; i++)
+		{
+			vector[i] = 0;
+		}
+	}
+	
+//	fill_n(0, quantityElements, 0);
 }
 
 longVector::longVector(int quantityElements, long& value) {
-	checkQuantityElements(quantityElements);
+	if (checkQuantityElements(quantityElements))
+	{
+		vector = new long[quantityElements];
+		for (int i = 0; i < quantityElements; i++)
+		{
+			vector[i] = value;
+		}
+	}
 	
-	vector = new long[quantityElements];
-	fill_n(0, quantityElements, value);
-
+	
+//	fill_n(0, quantityElements, value);
+	
 }
 
 longVector::longVector(int quantityElements, long* inputVector) {
@@ -259,7 +277,7 @@ longVector::longVector(int quantityElements, long* inputVector) {
 }
 
 longVector::longVector(const longVector& inputCopy) {
-	this->quantityElements = quantityElements;
+	this->quantityElements = inputCopy.quantityElements;
 	vector = new long[quantityElements];
 
 	for (int i = 0; i < quantityElements; i++)
@@ -270,7 +288,7 @@ longVector::longVector(const longVector& inputCopy) {
 	state = OK;
 }
 
-longVector& longVector::operator=(const longVector& assign) {
+longVector& longVector::operator= (const longVector& assign) {
 	if (quantityElements != assign.quantityElements)
 	{
 		if (vector)
@@ -290,19 +308,21 @@ longVector& longVector::operator=(const longVector& assign) {
 	return *this;
 }
 
-void longVector::checkQuantityElements(int quantityElements)
+bool longVector::checkQuantityElements(int quantityElements)
 {
 	if (quantityElements <= 0)
 	{
 		vector = nullptr;
 		this->quantityElements = 0;
 		state = ZERO_VECTOR;
-		cout << "Vector was not created: quantity <= 0";
+		cout << "Vector was not created(nullptr): quantity <= 0";
+		return false;
 	}
 	else
 	{
 		this->quantityElements = quantityElements;
 		state = OK;
+		return true;
 	}
 }
 
@@ -328,6 +348,11 @@ bool longVector::isIndexIncludedVector(int indexVector) {
 		cout << "!ERROR: Array index is out of range\n";
 		return false;
 	}
+}
+
+
+bool longVector::isEqual(longVector, longVector) {
+
 }
 
 void longVector::setValueVectorByIndex(int indexVector, const long& element)
@@ -379,7 +404,7 @@ long longVector::getValueVectorByIndex(int indexVector)
 }
 
 void longVector::output() {
-	cout << "Information about vector:";
+	cout << "Information about vector:\n";
 	if (quantityElements != 0)
 	{
 		for (int i = 0; i < quantityElements; i++)
@@ -389,7 +414,7 @@ void longVector::output() {
 	}
 	else
 	{
-		cout << "\tEmpty vector";
+		cout << "\tEmpty vector\n";
 	}
 }
 
@@ -399,6 +424,7 @@ longVector longVector::add(longVector& inputVector) {
 	if (leastQuantityOfVectors >= 0)
 	{
 		longVector total(leastQuantityOfVectors);
+		total.quantityElements = leastQuantityOfVectors;
 		for (int i = 0; i < leastQuantityOfVectors; i++)
 		{
 			total.vector[i] = vector[i] + inputVector.vector[i];
@@ -447,6 +473,62 @@ longVector longVector::multiplyVectorOnUnsignedInt(unsigned int number)
 		return longVector(0);
 	}
 	
+}
+
+
+int mainExample22() {
+	cout << "\nTASK 2:\n";
+	long value1 = 4;
+	long value2 = 7;
+
+	cout << endl << "longVector vector1(3, 4);" << endl;
+	longVector vector1(3, value1);
+	vector1.output();
+	
+	cout << endl << "longVector vector2(7, 7);" << endl;
+	longVector vector2(7, value2);
+	vector2.output();
+
+	cout << endl << "longVector vectorAdd = vector1.add(vector2);" << endl;
+	longVector vectorAdd = vector1.add(vector2);
+	vectorAdd.output();
+
+	cout << endl << "longVector vectorSubtract = vector1.subtract(vector2);" << endl;
+	longVector vectorSubtract = vector1.subtract(vector2);
+	vectorSubtract.output();
+
+	cout << endl << "longVector multiply = vector2.multiplyVectorOnUnsignedInt(2);" << endl;
+	longVector multiply = vector2.multiplyVectorOnUnsignedInt(2);
+	multiply.output();
+	
+	cout << endl << "vector1.setValueVectorByIndex(2, 23)" << endl;
+	vector1.setValueVectorByIndex(2, 23);
+	vector1.output();
+
+	cout << endl << "vector1.getValueVectorByIndex(2)" << endl;
+	cout << vector1.getValueVectorByIndex(2);
+	
+
+	//cout << "TASK 1.5 class Rectangle\n";
+
+	//cout << "triangle.area()       = " << triangle1.area() << "\n";
+
+	//cout << "triangle1.perimeter() = " << triangle1.perimeter() << "\n";
+
+	//array<double, 3> myArray;
+	//triangle1.get3Sides(myArray);
+	//cout << "Used method : get3Sides(): \n";
+	//cout << "Sides:\n";
+	//for (const auto& element : myArray)
+	//{
+	//	cout << element << " ";
+	//}
+
+	//cout << "\n";
+
+	//cout << "Used method : showInfoAboutTriangle()\n";
+	//triangle1.showInfoAboutTriangle();
+	return 1;
 }
 
 ////////////////////////////////////////////////

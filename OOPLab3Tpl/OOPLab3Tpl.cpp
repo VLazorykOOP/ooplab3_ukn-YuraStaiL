@@ -9,6 +9,7 @@
 //
 #include "Lab3Expaple.h"
 int mainExample11();
+int mainExample22();
 int main()
 {
     std::cout << " Lab #3  !\n";
@@ -21,8 +22,10 @@ int main()
     //if (conv == 1) conv = mainExample3(); 
     //if (conv == 1) conv = mainExample4();
 
-    mainExample11();
-    std::cout << "end";
+//    mainExample11();
+    std::cout << "end task1";
+
+    mainExample22();
 
 }
 
