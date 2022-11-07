@@ -19,6 +19,7 @@ private:
 	double side_c;
 	unsigned int color;
 
+
 public:
 	void setColor(unsigned int color) {
 		assert(color >= 0 && "Color must be greater or equal than 0");
@@ -181,7 +182,7 @@ int mainExample11(){
 }
 
 enum STATE {
-	OK, ZERO_VECTOR, NEGATIVE_SIZE, BAD_INIT, BAD_DIV
+	OK, ZERO_VECTOR, NEGATIVE_SIZE, BAD_INIT, BAD_DIV, OUT_OF_RANGE
 };
 
 
@@ -189,9 +190,10 @@ class longVector {
 	long quantityElements;
 	long *vector;
 	int state;
+	static int countObject;
 
 public:
-	longVector() : vector(nullptr), quantityElements(0), state (ZERO_VECTOR) {};
+	longVector() : vector(nullptr), quantityElements(0), state(ZERO_VECTOR) { countObject++; };
 	longVector(int quantityElements);
 	longVector(int quantityElements, long& value);
 	longVector(int quantityElements, long* InputVector);
@@ -211,23 +213,32 @@ public:
 	void input();
 
 	long getValueVectorByIndex(int indexVector);
+	long countLengthOfTheVector(const longVector&);
 
 	bool checkQuantityElements(int quantityElements);
 	bool isIndexIncludedVector(int indexVector);
-	bool isEmptyVector();
+	bool isEmptyVector(const longVector* object);
+	
 
-	bool isEqual(longVector, longVector);
-	bool isSmaller(longVector, longVector);
-	bool isGreater(longVector, longVector);
+	bool isEqual(const longVector&);
+	bool isSmaller(const longVector&);
+	bool isGreater(const longVector&);
 
 	longVector add(longVector& inputVector);
 	longVector subtract(longVector& inputVector);
 	longVector multiplyVectorOnUnsignedInt(unsigned int number);
-};
 
+	int getCountObject();
+};
+ 
+int longVector::countObject = 0;
+
+int longVector::getCountObject(){
+	return countObject;
+}
 
 longVector::longVector(int quantityElements) {
-	if(checkQuantityElements(quantityElements));
+	if(checkQuantityElements(quantityElements))
 	{
 		vector = new long[quantityElements];
 		for (int i = 0; i < quantityElements; i++)
@@ -235,6 +246,7 @@ longVector::longVector(int quantityElements) {
 			vector[i] = 0;
 		}
 	}
+		countObject++;
 	
 //	fill_n(0, quantityElements, 0);
 }
@@ -248,7 +260,7 @@ longVector::longVector(int quantityElements, long& value) {
 			vector[i] = value;
 		}
 	}
-	
+	countObject++;
 	
 //	fill_n(0, quantityElements, value);
 	
@@ -274,18 +286,22 @@ longVector::longVector(int quantityElements, long* inputVector) {
 	{
 		vector[i] = inputVector[i];
 	}
+
+	countObject++;
 }
 
 longVector::longVector(const longVector& inputCopy) {
 	this->quantityElements = inputCopy.quantityElements;
 	vector = new long[quantityElements];
-
+	
 	for (int i = 0; i < quantityElements; i++)
 	{
 		vector[i] = inputCopy.vector[i];
 	}
 
 	state = OK;
+
+	countObject++;
 }
 
 longVector& longVector::operator= (const longVector& assign) {
@@ -326,11 +342,11 @@ bool longVector::checkQuantityElements(int quantityElements)
 	}
 }
 
-bool longVector::isEmptyVector() {
-	if (this->quantityElements <= 0)
+bool longVector::isEmptyVector(const longVector* object) {
+	if (object->quantityElements <= 0)
 	{
-		return true;
 		cout << "!ERROR: Array is empty\n";
+		return true;
 	}
 	else
 	{
@@ -345,19 +361,29 @@ bool longVector::isIndexIncludedVector(int indexVector) {
 	}
 	else
 	{
+		state = OUT_OF_RANGE;
 		cout << "!ERROR: Array index is out of range\n";
 		return false;
 	}
 }
 
 
-bool longVector::isEqual(longVector, longVector) {
-
+bool longVector::isEqual(const longVector& vec1) {
+	return (countLengthOfTheVector(vec1) == countLengthOfTheVector(*this));
 }
+
+bool longVector::isSmaller(const longVector& vec1) {
+	return (countLengthOfTheVector(vec1) < countLengthOfTheVector(*this));
+}
+
+bool longVector::isGreater(const longVector& vec1) {
+	return (countLengthOfTheVector(vec1) > countLengthOfTheVector(*this));
+}
+
 
 void longVector::setValueVectorByIndex(int indexVector, const long& element)
 {
-	if (isIndexIncludedVector(indexVector) && !isEmptyVector())
+	if (isIndexIncludedVector(indexVector) && !isEmptyVector(this))
 	{
 		vector[indexVector] = element;
 	}
@@ -392,7 +418,7 @@ void longVector::input() {
 
 long longVector::getValueVectorByIndex(int indexVector)
 {
-	if (isIndexIncludedVector(indexVector) && !isEmptyVector())
+	if (isIndexIncludedVector(indexVector) && !isEmptyVector(this))
 	{
 		return vector[indexVector];
 	}
@@ -416,6 +442,15 @@ void longVector::output() {
 	{
 		cout << "\tEmpty vector\n";
 	}
+}
+
+long longVector::countLengthOfTheVector(const longVector& vector1) {
+	long suma = 0;
+	for (int i = 0; i < vector1.quantityElements; i++)
+	{
+		suma += vector1.vector[i];
+	}
+	return suma;
 }
 
 
@@ -458,7 +493,7 @@ longVector longVector::subtract(longVector& inputVector) {
 
 longVector longVector::multiplyVectorOnUnsignedInt(unsigned int number)
 {
-	if (!isEmptyVector())
+	if (!isEmptyVector(this))
 	{
 		longVector temp(quantityElements);
 		for (int i = 0; i < quantityElements; i++)
@@ -489,6 +524,11 @@ int mainExample22() {
 	longVector vector2(7, value2);
 	vector2.output();
 
+	cout << endl << "longVector vectorArr([3,6,-2,0]);" << endl;
+	long long_arr[4] = {32,2,10,-2};
+	longVector vector3(4, long_arr);
+	vector3.output();
+
 	cout << endl << "longVector vectorAdd = vector1.add(vector2);" << endl;
 	longVector vectorAdd = vector1.add(vector2);
 	vectorAdd.output();
@@ -507,6 +547,49 @@ int mainExample22() {
 
 	cout << endl << "vector1.getValueVectorByIndex(2)" << endl;
 	cout << vector1.getValueVectorByIndex(2);
+
+	cout << endl << "vector1.isEqual(vector2);" << endl;
+	if (vector1.isEqual(vector2))
+	{
+		cout << "TRUE";
+	}
+	else
+	{
+		cout << "FALSE";
+	}
+
+	cout << endl << "vector1.isEqual(vector1);" << endl;
+	if (vector1.isEqual(vector1))
+	{
+		cout << "TRUE";
+	}
+	else
+	{
+		cout << "FALSE";
+	}
+
+
+	cout << endl << "vector1.isGreater(vector2);" << endl;
+	if (vector1.isGreater(vector2))
+	{
+		cout << "TRUE";
+	}
+	else
+	{
+		cout << "FALSE";
+	}
+
+	
+	cout << endl << "vector1.isSmaller(vector2);" << endl;
+	if (vector1.isSmaller(vector2))
+	{
+		cout << "TRUE";
+	}
+	else
+	{
+		cout << "FALSE";
+	}
+
 	
 
 	//cout << "TASK 1.5 class Rectangle\n";
@@ -529,6 +612,96 @@ int mainExample22() {
 	//cout << "Used method : showInfoAboutTriangle()\n";
 	//triangle1.showInfoAboutTriangle();
 	return 1;
+}
+
+
+
+class Matrix {
+private:
+	double** matrix;
+	int row = 0;
+	int col = 0;
+
+public:
+	Matrix();
+	Matrix(int size);
+	Matrix(int row, int col, double value);
+	Matrix(const Matrix& copy);
+	Matrix& operator=(const Matrix& assign);
+	~Matrix() {
+		for (int count = 0; count < row; ++count)
+		{
+			delete[] matrix[count];
+		}
+		delete[] matrix;
+	}
+
+};
+
+Matrix::Matrix() { Matrix(3, 3, 0); }
+Matrix::Matrix(int size) { Matrix(size, size, 0); }
+
+Matrix::Matrix(int row, int col, double value) {
+	matrix = new double* [row];
+	for (int count = 0; count < row; ++count)
+	{
+		matrix[count] = new double[col];
+	}
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < col; j++)
+		{
+			matrix[i][j] = value;
+		}
+	}
+
+}
+
+Matrix::Matrix(const Matrix& copy)
+{
+	row = copy.row;
+	col = copy.col;
+	matrix = new double* [row];
+	for (int count = 0; count < row; ++count)
+	{
+		matrix[count] = new double[col];
+	}
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < col; j++)
+		{
+			matrix[i][j] = copy.matrix[i][j];
+		}
+	}
+}
+
+Matrix& Matrix::operator=(const Matrix& assign) {
+	if (row != assign.row || col != assign.col)
+	{
+		for (int count = 0; count < row; ++count)
+		{
+			delete[] matrix[count];
+		}
+		delete[] matrix;
+
+		row = assign.row;
+		col = assign.col;
+		matrix = new double* [row];
+		for (int count = 0; count < row; ++count)
+		{
+			matrix[count] = new double[col];
+		}
+	}
+
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < col; j++)
+		{
+			matrix[i][j] = assign.matrix[i][j];
+		}
+	}
+
+	return *this;
 }
 
 ////////////////////////////////////////////////
