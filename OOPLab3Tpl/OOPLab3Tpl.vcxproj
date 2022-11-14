@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Lab3Example.cpp" />
+    <ClCompile Include="MatrixMultiply.cpp" />
     <ClCompile Include="OOPLab3Tpl.cpp" />
   </ItemGroup>
   <ItemGroup>

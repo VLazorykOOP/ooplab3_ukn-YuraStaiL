@@ -157,9 +157,11 @@ public:
 
 
 int mainExample11(){
-	Triangle triangle1(2.0, 5.0, 6.0, 7);
 
 	cout << "TASK 1.5 class Rectangle\n";
+
+	cout << endl << "Triangle triangle1(2.0, 5.0, 6.0, 7);\n";
+	Triangle triangle1(2.0, 5.0, 6.0, 7);
 
 	cout << "triangle.area()       = " << triangle1.area() << "\n";
 
@@ -204,6 +206,7 @@ public:
 		if (vector) {
 			delete[] vector;
 		}
+		--countObject;
 
 	}
 
@@ -228,14 +231,14 @@ public:
 	longVector subtract(longVector& inputVector);
 	longVector multiplyVectorOnUnsignedInt(unsigned int number);
 
-	int getCountObject();
+	static int getCountObject() {
+		return countObject;
+	}
 };
  
-int longVector::countObject = 0;
+ int longVector::countObject = 0;
 
-int longVector::getCountObject(){
-	return countObject;
-}
+
 
 longVector::longVector(int quantityElements) {
 	if(checkQuantityElements(quantityElements))
@@ -261,8 +264,6 @@ longVector::longVector(int quantityElements, long& value) {
 		}
 	}
 	countObject++;
-	
-//	fill_n(0, quantityElements, value);
 	
 }
 
@@ -512,7 +513,7 @@ longVector longVector::multiplyVectorOnUnsignedInt(unsigned int number)
 
 
 int mainExample22() {
-	cout << "\nTASK 2:\n";
+	cout << "\nTASK 2.5:\n";
 	long value1 = 4;
 	long value2 = 7;
 
@@ -524,7 +525,7 @@ int mainExample22() {
 	longVector vector2(7, value2);
 	vector2.output();
 
-	cout << endl << "longVector vectorArr([3,6,-2,0]);" << endl;
+	cout << endl << "long long_arr[4] = {32,2,10,-2};\nlongVector vector3(4, long_arr);" << endl;
 	long long_arr[4] = {32,2,10,-2};
 	longVector vector3(4, long_arr);
 	vector3.output();
@@ -548,6 +549,7 @@ int mainExample22() {
 	cout << endl << "vector1.getValueVectorByIndex(2)" << endl;
 	cout << vector1.getValueVectorByIndex(2);
 
+	cout << endl << "count objects : "<< longVector::getCountObject();
 	cout << endl << "vector1.isEqual(vector2);" << endl;
 	if (vector1.isEqual(vector2))
 	{
@@ -618,17 +620,22 @@ int mainExample22() {
 
 class Matrix {
 private:
-	double** matrix;
-	int row = 0;
-	int col = 0;
+	int** matrix = nullptr;
+	int row;
+	int col;
 
 public:
 	Matrix();
 	Matrix(int size);
-	Matrix(int row, int col, double value);
+	Matrix(int row, int col, int value);
 	Matrix(const Matrix& copy);
 	Matrix& operator=(const Matrix& assign);
+	Matrix operator+(const Matrix& addition);
+	Matrix operator-(const Matrix&);
+	Matrix operator*(const Matrix&);
+	Matrix operator*(const short scalar);
 	~Matrix() {
+		cout << "DESTRUCT" << endl;
 		for (int count = 0; count < row; ++count)
 		{
 			delete[] matrix[count];
@@ -636,16 +643,28 @@ public:
 		delete[] matrix;
 	}
 
+	int getElementMatrix(int row, int col);
+
+	bool isIndexIncludedMatrix(int row, int col);
+
+	void setElementMatrix(int row, int col, int value);
+	void showInfoAboutMatrix();
 };
 
-Matrix::Matrix() { Matrix(3, 3, 0); }
-Matrix::Matrix(int size) { Matrix(size, size, 0); }
+Matrix::Matrix(): Matrix(3, 3, 0) {}
+Matrix::Matrix(int size): Matrix(size, size, 0) {
+	assert(size >= 0 && "size must be > 0");
+}
 
-Matrix::Matrix(int row, int col, double value) {
-	matrix = new double* [row];
+Matrix::Matrix(int row, int col, int value) {
+	assert((row > 0  || col > 0) && "row, col must be > 0");
+
+	this->row = row;
+	this->col = col;
+	matrix = new int* [row];
 	for (int count = 0; count < row; ++count)
 	{
-		matrix[count] = new double[col];
+		matrix[count] = new int[col];
 	}
 	for (int i = 0; i < row; i++)
 	{
@@ -659,12 +678,13 @@ Matrix::Matrix(int row, int col, double value) {
 
 Matrix::Matrix(const Matrix& copy)
 {
+	if (this == &copy) return;
 	row = copy.row;
 	col = copy.col;
-	matrix = new double* [row];
+	matrix = new int* [row];
 	for (int count = 0; count < row; ++count)
 	{
-		matrix[count] = new double[col];
+		matrix[count] = new int[col];
 	}
 	for (int i = 0; i < row; i++)
 	{
@@ -686,10 +706,10 @@ Matrix& Matrix::operator=(const Matrix& assign) {
 
 		row = assign.row;
 		col = assign.col;
-		matrix = new double* [row];
+		matrix = new int* [row];
 		for (int count = 0; count < row; ++count)
 		{
-			matrix[count] = new double[col];
+			matrix[count] = new int[col];
 		}
 	}
 
@@ -698,468 +718,178 @@ Matrix& Matrix::operator=(const Matrix& assign) {
 		for (int j = 0; j < col; j++)
 		{
 			matrix[i][j] = assign.matrix[i][j];
+			cout << this->matrix[i][j] << " ";
 		}
 	}
 
 	return *this;
+}
+
+Matrix Matrix::operator+(const Matrix& addition) {
+	if (row == addition.row && col == addition.col)
+	{
+		Matrix temp(row, col, 0);
+
+		for (int i = 0; i < temp.row; i++)
+		{
+			for (int j = 0; j < temp.col; j++)
+			{
+				temp.matrix[i][j] = matrix[i][j] + addition.matrix[i][j];
+			}
+		}
+		return temp;
+	}
+	else
+	{
+		cout << endl << "Matriсes have different sizes" << endl;
+		cout << "will be returned zero matrix[1][1]" << endl;
+		Matrix zeroMatrix(1);
+		return zeroMatrix;
+	}
+}
+
+Matrix Matrix::operator-(const Matrix& subtract) {
+	if (row == subtract.row && col == subtract.col)
+	{
+		Matrix temp(row, col, 0);
+
+		for (int i = 0; i < temp.row; i++)
+		{
+			for (int j = 0; j < temp.col; j++)
+			{
+				temp.matrix[i][j] = matrix[i][j] + subtract.matrix[i][j];
+			}
+		}
+		return temp;
+
+	}
+	else
+	{
+		cout << endl << "Matriсes have different sizes" << endl;
+		cout << "will be returned zero matrix[1][1]" << endl;
+		Matrix zeroMatrix(1);
+		return zeroMatrix;
+	}
+}
+
+Matrix Matrix::operator*(const Matrix& multiply) {
+	if (col == multiply.row)
+	{
+		Matrix temp(row, multiply.col, 0);
+
+		for (int i = 0; i < temp.row; i++)
+		{
+			for (int j = 0; j < temp.col; j++)
+			{
+				for (int inner = 0; inner < col; inner++)
+				{
+					temp.matrix[i][j] += matrix[i][inner] * multiply.matrix[inner][j];
+				}
+				
+			}
+		}
+		return temp;
+
+	}
+	else
+	{
+		cout << endl << "Matriсes cannot be multiply" << endl;
+		cout << "will be returned zero matrix[1][1]" << endl;
+		Matrix zeroMatrix(1);
+		return zeroMatrix;
+	}
+}
+
+
+Matrix Matrix::operator*(const short scalar) {
+	Matrix temp(row, col, 0);
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < col; j++)
+		{
+			temp.matrix[i][j] += matrix[i][j] * scalar;
+		}
+	}
+	return temp;
+ }
+
+bool Matrix::isIndexIncludedMatrix(int row, int col) {
+	if ( (row >= 0) && ( row < this->row ) && (col >= 0) && (col < this->col) )
+	{
+		return true;
+	}
+	else
+	{
+		cout << endl << "!ERROR: Array index is out of range\n";
+		return false;
+	}
+}
+
+void Matrix::setElementMatrix(int row, int col, int value = 0) {
+	if (isIndexIncludedMatrix(row, col))
+	{
+		matrix[row][col] = value;
+	}
+}
+
+int Matrix::getElementMatrix(int row, int col) {
+	assert(isIndexIncludedMatrix(row, col));
+	return matrix[row][col];
+}
+
+
+
+void Matrix::showInfoAboutMatrix() {
+	for (int i = 0; i < row; i++)
+	{	
+		cout << endl;
+		for (int j = 0; j < col; j++)
+		{
+			cout << matrix[i][j] << " ";
+		}
+	}
+	cout << endl;
+}
+
+int mainExample33(){
+	cout << "\tStart TASK 3.5\n";
+	cout << endl << "Matrix defaultMatrix; /// defaultMatrix.showInfoAboutMatrix();";	
+	Matrix defaultMatrix;
+	defaultMatrix.showInfoAboutMatrix();
+
+	cout << endl << "Matrix matrix1(2,3,5);\nmatrix1.showInfoAboutMatrix();";
+	Matrix matrix1(2,3,5);
+	matrix1.showInfoAboutMatrix();
+
+	cout << endl << "Matrix matrix2(3,2,2);\nmatrix1.showInfoAboutMatrix();";
+	Matrix matrix2(3,2,2);
+	matrix2.showInfoAboutMatrix();
+
+	matrix1.setElementMatrix(1, 0, 3);
+	cout << endl << "matrix1.setElementMatrix(1, 0, 3);\nmatrix1.showInfoAboutMatrix()";
+	matrix1.showInfoAboutMatrix();
+
+	cout << endl << "/// defaultMatrix.getElementMatrix(2,1) -> ";
+	cout << matrix1.getElementMatrix(1, 0) << endl;
+
+
+	cout << endl << "Matrix assign = matrix1;\nassign1.showInfoAboutMatrix(); ";
+	Matrix assign = matrix1;
+	assign.showInfoAboutMatrix();
+
+	cout << endl << "Matrix addition = assign + matrix1;\naddition.showInfoAboutMatrix();";
+	Matrix addition = assign + matrix1;
+	addition.showInfoAboutMatrix();
+
+	cout << endl << "Matrix multiply = matrix1 * matrix2;\multiply.showInfoAboutMatrix();";
+	Matrix multiply = matrix1 * matrix2;
+	multiply.showInfoAboutMatrix();
+
+	cout << endl << "Matrix multiplyScalar = matrix1 * 2;;\multiplyScalar.showInfoAboutMatrix();";
+	Matrix multiplyScalar = matrix1 * 3;
+	multiplyScalar.showInfoAboutMatrix();
+
+	return 1;
 }
 
 ////////////////////////////////////////////////
-
-class Icosahedron {
-	double a; // side of the icosahedron
-	unsigned int color;
-public:
-	Icosahedron() : a(1.0), color(0) {}
-	Icosahedron(double ai) : a(ai), color(0) {}
-	Icosahedron(int ic) : a(1.0) { if (ic >= 0) color = ic; else color = 0; }
-	Icosahedron(double a, int c) {
-		this->a = a;
-		if (c >= 0) color = c; else color = 0;
-	}
-	double getA() const
-	{
-		return a;
-	}
-	void setA(double a)
-	{
-		if (a < 0 || a > 1.e+100)
-		{
-			cout << " Error set  a \n";
-			return;
-		}
-		this->a = a;
-	}
-	double getColor() const
-	{
-		return color;
-	}
-	void setColor(int c)
-	{
-		if (c < 0 || c > 10000)
-		{
-			cout << " Error set  color \n";
-			return;
-		}
-		this->color = c;
-	}
-	double S() {
-		return 5 * a * a * sqrt(3.0);
-	}
-	double V() {
-		return 5 * a * a * a * (3 + sqrt(5.0)) / 12.0;
-	}
-	double r() {
-		return a * (3 + sqrt(5.0)) / (4.0 * sqrt(3.0));
-	}
-	double R() {
-		return sqrt(2 * (5 + sqrt(5.0) * a)) / 4.0;
-	}
-	void printInfo()
-	{
-		cout << "\n a= " << a << " color = " << color;
-		cout << "  S= " << S() << " V = " << V() << "  r= " << r() << " V = " << R() << endl;
-	}
-
-};
-
-
-int mainExample1()
-{
-	Icosahedron obj;
-	obj.printInfo();
-	double in_a; int in_color;
-	cout << " Input side and color Icosahedron  "; cin >> in_a >> in_color;
-	Icosahedron obj1(in_a), obj2(in_color), obj3(in_a, in_color);
-	obj1.printInfo();
-	obj2.printInfo();
-	obj3.printInfo();
-	obj.setA(-5);
-	obj.printInfo();
-	obj.setA(5);
-	obj.printInfo();
-	obj.setA(2.e100);
-	obj.printInfo();
-	obj.setColor(-10);
-	obj.printInfo();
-	obj.setColor(10);
-	obj.printInfo();
-	obj.setColor(10001);
-	obj.printInfo();
-	cout << " End testing \n";
-	return 1;
-}
-
-
-// Ключове слово static 
-
-class foo
-{
-private:
-	static int count; // загальне поле всім об'єктів
-	// (У сенсі "оголошення")
-public:
-	foo() { incObj(); } // інкрементування під час створення об'єкта
-	static int incObj() { return ++count; }
-	int getcount() { return count; }
-};
-int  foo::count = 0;
-// Ключове слово static ставиться перед типом способу.В основному використовуються
-//для роботи зі статичними полями класу.
-
-/*  Example 3
-Створити тип даних - клас вектор, який має поля x, y типу double і змінну стану. У класі визначити
-o	конструктор без параметрів(інінціалізує поля в нуль);
-o	конструктор з одним параметром типу double (інінціалізує поля);
-o	конструктор з одним параметром вказівник на тип double (інінціалізує поля x, y значенням масиву за вказівником, якщо вказівник NULL (nulptr) то встановити код помилки);
-o	деструктор із виведенням інформації про стан вектора;
-o	визначити функції друку, додавання, віднімання, векторний добуток які здійснюють ці арифметичні операції з даними цього класу;
-o	функцію ділення на ціле типу double(при діленні на 0 змінити стан, а ділення не виконувати);
-o	визначити функцію порівняння менше які повертають true або false.
-У змінну стани встановлювати код помилки, діленні на 0, при передачі NULL (nulptr) в конструкторі із вказівником. Передбачити можливість підрахунку числа об'єктів даного типу. Написати програму тестування всіх можливостей цього класу.
-*/
-
-
-class Vec2
-{
-	double  x, y;
-	int state;
-	static int count;
-public:
-	Vec2() : x(0), y(0) {
-		state = OK; count++;
-	}   // 	 конструктор без параметрів
-	Vec2(double iv) : x(iv), y(iv) {
-		state = OK; count++;
-	}
-	Vec2(double ix, double iy);
-	Vec2(double* v);
-	~Vec2() {
-		count--;
-		cout << " state Vec " << state;
-		cout << " Vec delete \n";
-	}
-	Vec2(const Vec2&);
-	Vec2 Add(Vec2& d);
-	Vec2 Sub(Vec2& d);
-	Vec2 Mul(double d);
-	Vec2 Div(double d);
-	void Input();   //  !!! Без первантаження операцій    
-	void Output();  //  !!! Без первантаження операцій
-	bool CompLessAll(Vec2& s);
-	static int getCount() {
-		if (count <= 0) cout << " Немає об'єктів Vec2 ";
-		return count;
-	}
-	int getState() { return state; }
-};
-int Vec2::count = 0;
-Vec2::Vec2(double ix, double iy) {
-	x = ix; y = iy;
-	state = OK;
-	count++;
-}
-Vec2::Vec2(const Vec2& s) {
-	if (this == &s) return;
-	x = s.x; y = s.y; state = OK;
-	count++;
-};
-Vec2::Vec2(double* v) {
-	if (v == nullptr) {
-		state = BAD_INIT; x = 0; y = 0;
-	}
-	else {
-		x = v[0]; y = v[1];
-		state = OK;
-	}
-	count++;
-}
-void Vec2::Input() {
-	cout << " Input  x y ";
-	cin >> x >> y;
-}
-void Vec2::Output() {
-	cout << " x =" << x << " y = " << y << " state  " << state << endl;
-}
-
-Vec2 Vec2::Add(Vec2& s) {
-	Vec2 tmp;
-	tmp.x = x + s.x;
-	tmp.y = y + s.y;
-	return tmp;
-}
-
-Vec2 Vec2::Sub(Vec2& s) {
-	Vec2 tmp;
-	tmp.x = x - s.x;
-	tmp.y = y - s.y;
-	return tmp;
-}
-Vec2 Vec2::Div(double d) {
-	Vec2 tmp;
-	if (fabs(d) < 1.e-25) {
-		tmp.state = BAD_DIV;
-		cout << " Error div \n";
-		return *this;
-	}
-	tmp.x = x / d;
-	tmp.y = y / d;
-	return tmp;
-}
-Vec2 Vec2::Mul(double d) {
-	Vec2 tmp;
-	tmp.x = x * d;
-	tmp.y = y * d;
-	return tmp;
-}
-
-bool Vec2::CompLessAll(Vec2& s) {
-
-	if (x < s.x && y < s.y) return true;
-	return false;
-}
-
-int mainExample3()
-{
-#if !defined(CODING_VS_CODE)
-	setlocale(LC_CTYPE, "ukr");
-	cout << "Тестування створенного класу \n";
-	cout << "Тестування конструкторiв \n"; 
-#else 
-	cout << "Testing create class  \n";
-	cout << "Testing crot's  \n";
-#endif
-	Vec2 ObjCDef;
-	ObjCDef.Output();
-	Vec2 ObjP1(10.0);
-	ObjP1.Output();
-	double  a = 1.0, b = 2.0;
-	Vec2  ObjP2(a, b);
-	ObjP2.Output();
-	Vec2 ObjCopy(ObjP2);
-	double* v = nullptr, v2[] = { 1.2, 3.3 };
-	Vec2  ObjP3(v2);
-	if (ObjP3.getState() != OK) cout << " ObjP3  x= 0  y= 0  \n";
-	Vec2  ObjP4(v2);
-	if (ObjP4.getState() != OK) cout << " ObjP4 x= 0  y= 0  \n";
-#if !defined(CODING_VS_CODE)
-	cout << " Кiлькiсть створених об'єктiв Vec2 " << Vec2::getCount() << endl;
-	cout << "Тестування введення \n";
-	ObjCDef.Input();
-	cout << "Тестування функцiй \n";
-	ObjCDef = ObjCDef.Add(ObjP2);
-	ObjCDef.Output();
-	cout << " \n Кiлькiсть створених об'єктiв Vec2 до Sub " << Vec2::getCount() << endl;
-	ObjCDef = ObjCDef.Sub(ObjP2);
-	cout << " \n Кiлькiсть створених об'єктiв Vec2 пiсля Sub " << Vec2::getCount() << endl;
-#else 
-	cout << "Testing input \n";
-	ObjCDef.Input();
-	cout << "Testing gunction \n";
-	ObjCDef = ObjCDef.Add(ObjP2);
-	ObjCDef.Output();
-	cout << " \n Counts create objects Vec2 before  Sub " << Vec2::getCount() << endl;
-	ObjCDef = ObjCDef.Sub(ObjP2);
-	cout << " \n  Counts create objects Vec2 after Sub  " << Vec2::getCount() << endl;
-#endif
-
-	ObjCDef.Output();
-	ObjCDef = ObjCDef.Mul(5);
-	ObjCDef.Output();
-	ObjCDef = ObjCDef.Div(1.3);
-	if (ObjCDef.getState() == STATE::BAD_DIV) cout << "BAD_DIV \n";
-	ObjCDef.Output();
-
-	ObjCDef = ObjCDef.Div(0.0);
-	if (ObjCDef.getState() == STATE::BAD_DIV) cout << "BAD_DIV \n";
-	ObjCDef.Output();
-	cout << "ObjCopy state " << ObjCopy.getState() << endl;
-	if (ObjCopy.CompLessAll(ObjCDef))  cout << "ObjCopy less ObjDef  " << endl;
-
-	
-#if !defined(CODING_VS_CODE)
-	cout << "Завершення  тестування  \n";
-#else 
-	cout << "Completion of testing  \n";
-#endif
-	return 1;
-
-}
-/*example  4
-Створити тип даних - клас вектор, який має вказівник на ComplexDouble, число елементів і змінну стану. У класі визначити
-o	 конструктор без параметрів( виділяє місце для одного елемента та інінціалізує його в нуль);
-o	конструктор з одним параметром - розмір вектора( виділяє місце та інінціалізує масив значенням нуль);
-o	конструктор із двома параметрами - розмір вектора та значення ініціалізації(виділяє місце (значення перший аргумент) та інінціалізує значенням другого аргументу).
-o	конструктор копій та операцію присвоєння; // !!!
-o	деструктор звільняє пам'ять;
-o	визначити функції друку, додавання;
-У змінну стани встановлювати код помилки, коли не вистачає пам'яті, виходить за межі масиву. Передбачити можливість підрахунку числа об'єктів даного типу. Написати програму тестування всіх можливостей цього класу.
-*/
-
-#include<complex>
-using namespace std;
-typedef complex<double> ComplexDouble;
-#define _RE 0
-#define _IM 1
-
-class ComplexVector
-{
-	ComplexDouble* v;
-	int num;
-	int state = 0;
-public:
-	ComplexVector() : v(NULL), num(0), state(0) {}
-	ComplexVector(int n);
-	ComplexVector(int n, ComplexDouble&);
-	ComplexVector(int n, ComplexDouble*);
-	ComplexVector(const ComplexVector& s);
-	ComplexVector& operator=(const ComplexVector& s);
-	~ComplexVector() {
-		cout << " del vec";
-		if (v) delete[] v;
-	}
-	void Output();
-	void Input();
-	ComplexVector Add(ComplexVector& b);
-
-};
-
-ComplexVector::ComplexVector(int n) {
-	if (n <= 0) { v = NULL;  num = 0;   state = -1; cout << " Vec --> 0  "; }
-	num = n;
-	v = new ComplexDouble[n];
-	for (int i = 0; i < n; i++) {
-		v[i] = 0.0;
-		//v[i]._Val[_RE]=0.0; v[i]._Val[_IM]=0.0;  
-	}
-}
-ComplexVector::ComplexVector(int n, ComplexDouble& b) {
-	if (n <= 0) { v = NULL;  num = 0;   state = -1; cout << " Vec --> 0  "; }
-	num = n;
-	v = new ComplexDouble[n];
-	for (int i = 0; i < n; i++) {
-		v[i] = b;
-		//v[i]._Val[_RE]=0.0; v[i]._Val[_IM]=0.0;  
-	}
-}
-
-ComplexVector::ComplexVector(int n, ComplexDouble* p) {
-	if (n <= 0 || p == NULL) { v = NULL;  num = 0;   state = -1; cout << " Vec --> 0  "; }
-	num = n;
-	v = new ComplexDouble[n];
-	for (int i = 0; i < n; i++) {
-		v[i] = p[i];
-	}
-}
-
-ComplexVector::ComplexVector(const ComplexVector& s) {
-
-	num = s.num;
-	v = new ComplexDouble[num];
-	state = 0;
-	for (int i = 0; i < num; i++)   v[i] = s.v[i];
-}
-
-ComplexVector& ComplexVector::operator=(const ComplexVector& s) {
-
-	if (num != s.num)
-	{
-		if (v) delete[] v;
-		num = s.num;
-		v = new ComplexDouble[num];
-		state = 0;
-	}
-	for (int i = 0; i < num; i++)   v[i] = s.v[i];
-	return *this;
-}
-void ComplexVector::Input() {
-	if (num == 0) {
-		if (v) delete[] v;
-		do {
-			cout << "Input size Vec\n";
-			cin >> num;
-		} while (num <= 0);
-		v = new ComplexDouble[num];
-	}
-	for (int i = 0; i < num; i++) {
-
-#if defined(_MSC_VER)
-cout << " v [ " << i << " ] real img  "; cin >> v[i] >> v[i]._Val[_IM];
-#else 
-double re,im;
-cout << " v [ " << i << " ] real img  "; cin >> re>>im;
-v[i].real(re); 
-v[i].imag(im);
-#endif		
-		
-		
-	}
-}
-
-void ComplexVector::Output() {
-	if (num != 0) {
-		for (int i = 0; i < num; i++) {
-			cout << " v [ " << i << " ]   " << v[i] << '\t';
-			cout << endl;
-		}
-	}
-}
-
-ComplexVector ComplexVector::Add(ComplexVector& b) {
-	int tnum;
-	tnum = num < b.num ? num : b.num;
-	if (tnum >= 0) {
-		ComplexVector tmp(tnum);
-		for (int i = 0; i < tnum; i++) tmp.v[i] = v[i] + b.v[i];
-		return tmp;
-	}
-	return ComplexVector(0);
-}
-
-
-int mainExample4()
-{
-	ComplexDouble a(1.0, 2), b, c;
-	cout << a << endl;
-#if defined(_MSC_VER)
-    b._Val[_RE] = 21.3;
-	b._Val[_IM] = 22.3;
-#else 
-    b.real( 21.3);
-	b.imag (22.3);
-#endif	
-	
-	cout << b << endl;
-	c = a + b;
-	cout << c << endl;
-	cout << " Test  " << endl;
-	ComplexVector VecObj, VecObj1(10);
-	cout << "VecObj \n";
-	VecObj.Output();
-	cout << "VecObj1 \n";
-	VecObj1.Output();
-	cout << " Input a " << endl;
-
-#if defined(_MSC_VER)
- cin >> a >> a._Val[_IM];
-#else 
-double re,im;
-cin >> re>>im;
-a.real(re); 
-a.imag(im);
-#endif		
-	cout << a << endl;
-	ComplexVector VecObj2(10, a);
-	VecObj2.Output();
-
-	VecObj.Input();
-	cout << endl;
-	VecObj.Output();
-	VecObj1 = VecObj.Add(VecObj2);
-	VecObj1.Output();
-
-	return 1;
-}
-
-/// 
-
